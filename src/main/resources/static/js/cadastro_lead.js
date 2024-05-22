@@ -20,36 +20,72 @@ function mostra_toast(icone, mensagem){
 
 $("#cadastrar_lead").click(function(){
     let nome = $("#nome").val();
-    let data_nascimento = $("#dtNasc").val();
+    let data_nascimento = $("#dtnasc").val();
     let telefone = $("#telefone").val();
     let email = $("#email").val();
+    let podeSalvar = true
 
     if(campo_esta_vazio(telefone) && campo_esta_vazio(email)){
         mostra_toast("error", "O email ou o telefone precisa ser preenchido")
         $("#telefone").focus()
-        $("#divTelefone").addClass("error")
-        $("#divEmail").addClass("error")
+        $("#divtelefone").addClass("error")
+        $("#divemail").addClass("error")
+        podeSalvar = false
     }else{
-        $("#divTelefone").removeClass("error")
-        $("#divEmail").removeClass("error")
+        $("#divtelefone").removeClass("error")
+        $("#divemail").removeClass("error")
     }
 
     if(campo_esta_vazio(data_nascimento)){
         mostra_toast("error", "A data de nascimento precisa ser preenchido")
-        $("#dtNasc").focus()
-        $("#divDataNascimento").addClass("error")
+        $("#dtnasc").focus()
+        $("#divdtnasc").addClass("error")
+        podeSalvar = false
     }else{
-        $("#divDataNascimento").removeClass("error")
+        $("#divdtnasc").removeClass("error")
     }
 
     if(campo_esta_vazio(nome)){
         mostra_toast("error", "O nome precisa ser preenchido")
         $("#nome").focus()
-        $("#divNome").addClass("error")
+        $("#divnome").addClass("error")
+        podeSalvar = false
     }else{
-        $("#divNome").removeClass("error")
+        $("#divnome").removeClass("error")
     }
 
+    if (podeSalvar){
+        $.ajax({
+            url: "/cad_lead",
+            method: "POST",
+            data: {
+                nome : nome,
+                data_nascimento : data_nascimento,
+                telefone : telefone,
+                email : email
+            },
+            success: function(data){
+                mostra_toast(data.sucesso ? "success" : "error", data.mensagem)
+                $("#nome").val("")
+                $("#dtnasc").val("")
+                $("#telefone").val("")
+                $("#email").val("")
+            },
+            error: function(){
+                mostra_toast("error", "Erro ao cadastrar a pessoa!")
+            }
+        })
+    }
+
+})
+
+$("#nome, #dtnasc, #telefone, #email").on("focusout", function(){
+    let id = $(this).attr("id")
+    if(campo_esta_vazio($("#" + id).val())){
+        $("#div" + id).addClass("error")
+    }else{
+        $("#div" + id).removeClass("error")
+    }
 })
 
 function campo_esta_vazio(campo){
